@@ -200,7 +200,11 @@
 - (BOOL)shouldIncludeEntityAtCursor:(PLClangCursor *)cursor {
     if ((cursor.isDeclaration && [self shouldIncludeDeclarationAtCursor:cursor]) ||
         (cursor.kind == PLClangCursorKindMacroDefinition && [self shouldIncludeMacroDefinitionAtCursor:cursor])) {
-        return ([cursor.spelling length] > 0 && [cursor.spelling hasPrefix:@"_"] == NO);
+        BOOL isPrivateAPI = [cursor.spelling hasPrefix:@"_"] == YES;
+        if (cursor.kind == PLClangCursorKindObjCCategoryDeclaration && !isPrivateAPI) {
+            return YES;
+        }
+        return ([cursor.spelling length] > 0 && !isPrivateAPI);
     }
 
     return NO;

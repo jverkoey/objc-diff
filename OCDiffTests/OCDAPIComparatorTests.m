@@ -458,6 +458,24 @@ static NSString * const OCDTestPath = @"test.h";
                       addition:@"@interface Base @end @interface Base (Test) @property int testProperty; @end"];
 }
 
+- (void)testAnonymousCategory {
+    [self testAddRemoveForName:@"Base ()"
+                          base:@"@interface Base @end"
+                      addition:@"@interface Base @end @interface Base () @end"];
+}
+
+- (void)testAnonymousCategoryMethod {
+    [self testAddRemoveForName:@"-[Base testMethod]"
+                          base:@"@interface Base @end @interface Base () @end"
+                      addition:@"@interface Base @end @interface Base () -(void)testMethod; @end"];
+}
+
+- (void)testAnonymousCategoryProperty {
+    [self testAddRemoveForName:@"Base.testProperty"
+                          base:@"@interface Base @end @interface Base () @end"
+                      addition:@"@interface Base @end @interface Base () @property int testProperty; @end"];
+}
+
 - (void)testCategoryModificationAddProtocol {
     NSArray *differences = [self differencesBetweenOldSource:@"@protocol A @end @protocol B @end @interface Base @end @interface Base (Test) @end"
                                                    newSource:@"@protocol A @end @protocol B @end @interface Base @end @interface Base (Test) <A> @end"];
@@ -1171,7 +1189,7 @@ static NSString * const OCDTestPath = @"test.h";
     XCTAssertEqualObjects(differences, @[], @"Unchanged test failed for %@", name);
 
     // Unchanged, different line number
-    differences = [self differencesBetweenOldSource:addition newSource:[@"\n" stringByAppendingString:addition]];
+    differences = [self differencesBetweenOldSource:addition newSource:[@"" stringByAppendingString:addition]];
     XCTAssertEqualObjects(differences, @[], @"Move to different line number test failed for %@", name);
 }
 
