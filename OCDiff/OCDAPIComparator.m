@@ -51,18 +51,15 @@
 - (NSDictionary *)fuzzyAPIWithAPI:(NSDictionary *)api {
     NSMutableDictionary *fuzzyAPI = [NSMutableDictionary dictionary];
     for (NSString *USR in api) {
-        NSString *fuzzyUSR = [self fuzzyUSRForUSR:USR];
+        NSString *baseFuzzyUSR = [self fuzzyUSRForUSR:USR];
+        NSString *fuzzyUSR = baseFuzzyUSR;
+        NSInteger ix = 0;
+        while (fuzzyAPI[fuzzyUSR]) {
+            ix++;
+            fuzzyUSR = [baseFuzzyUSR stringByAppendingString:[@(ix) stringValue]];
+        }
         NSAssert(!fuzzyAPI[fuzzyUSR], @"Existing USR found %@ %@.", fuzzyUSR, USR);
         fuzzyAPI[fuzzyUSR] = api[USR];
-
-#if 0
-        NSMutableArray *fuzzyUSRs = fuzzyAPI[fuzzyUSR];
-        if (!fuzzyUSRs) {
-            fuzzyUSRs = [NSMutableArray array];
-            fuzzyAPI[fuzzyUSR] = fuzzyUSRs;
-        }
-        [fuzzyUSRs addObject:api[USR]];
-#endif
     }
     return fuzzyAPI;
 }

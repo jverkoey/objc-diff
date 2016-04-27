@@ -476,6 +476,24 @@ static NSString * const OCDTestPath = @"test.h";
                       addition:@"@interface Base @end @interface Base () @property int testProperty; @end"];
 }
 
+- (void)testTwoAnonymousCategory {
+    [self testAddRemoveForName:@"Base ()"
+                          base:@"@interface Base @end @interface Base () @end"
+                      addition:@"@interface Base @end @interface Base () @end @interface Base () @end"];
+}
+
+- (void)testTwoAnonymousCategoryMethod {
+    [self testAddRemoveForName:@"-[Base testMethod]"
+                          base:@"@interface Base @end @interface Base () @end @interface Base () @end"
+                      addition:@"@interface Base @end @interface Base () -(void)testMethod; @end @interface Base () @end"];
+}
+
+- (void)testTwoAnonymousCategoryProperty {
+    [self testAddRemoveForName:@"Base.testProperty"
+                          base:@"@interface Base @end @interface Base () @end @interface Base () @end"
+                      addition:@"@interface Base @end @interface Base () @property int testProperty; @end @interface Base () @end"];
+}
+
 - (void)testCategoryModificationAddProtocol {
     NSArray *differences = [self differencesBetweenOldSource:@"@protocol A @end @protocol B @end @interface Base @end @interface Base (Test) @end"
                                                    newSource:@"@protocol A @end @protocol B @end @interface Base @end @interface Base (Test) <A> @end"];
