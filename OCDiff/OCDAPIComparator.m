@@ -49,18 +49,32 @@
 }
 
 - (NSDictionary *)fuzzyAPIWithAPI:(NSDictionary *)api {
-    NSMutableDictionary *fuzzyAPI = [NSMutableDictionary dictionary];
+    // First pass generates a dictionary of fuzzy USRs to their USRs.
+    NSMutableDictionary *firstPass = [NSMutableDictionary dictionary];
     for (NSString *USR in api) {
-        NSString *baseFuzzyUSR = [self fuzzyUSRForUSR:USR];
-        NSString *fuzzyUSR = baseFuzzyUSR;
-        NSInteger ix = 0;
-        while (fuzzyAPI[fuzzyUSR]) {
-            ix++;
-            fuzzyUSR = [baseFuzzyUSR stringByAppendingString:[@(ix) stringValue]];
+        NSString *fuzzyUSR = [self fuzzyUSRForUSR:USR];
+        NSMutableArray *fuzzyUSRs = firstPass[fuzzyUSR];
+        if (!fuzzyUSRs) {
+            fuzzyUSRs = [NSMutableArray array];
+            firstPass[fuzzyUSR] = fuzzyUSRs;
         }
-        NSAssert(!fuzzyAPI[fuzzyUSR], @"Existing USR found %@ %@.", fuzzyUSR, USR);
-        fuzzyAPI[fuzzyUSR] = api[USR];
+        [fuzzyUSRs addObject:USR];
     }
+
+    // Second pass flattens the fuzzy USRs by sorting their line numbers
+    NSMutableDictionary *fuzzyAPI = [NSMutableDictionary dictionary];
+    for (NSString *fuzzyUSR in firstPass) {
+        NSArray *sortedUSRs = [firstPass[fuzzyUSR] sortedArrayUsingSelector:@selector(compare:)];
+        // Don't suffix the first entry. Consider old API with one instance vs new API with two; we
+        // don't want the first USR's identifier to change.
+        fuzzyAPI[fuzzyUSR] = api[[sortedUSRs firstObject]];
+
+        for (NSUInteger ix = 1; ix < [sortedUSRs count]; ++ix) {
+            NSString *USR = sortedUSRs[ix];
+            fuzzyAPI[[fuzzyUSR stringByAppendingFormat:@"@%tu", ix]] = api[USR];
+        }
+    }
+
     return fuzzyAPI;
 }
 
