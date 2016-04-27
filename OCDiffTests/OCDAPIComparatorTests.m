@@ -1189,7 +1189,7 @@ static NSString * const OCDTestPath = @"test.h";
     XCTAssertEqualObjects(differences, @[], @"Unchanged test failed for %@", name);
 
     // Unchanged, different line number
-    differences = [self differencesBetweenOldSource:addition newSource:[@"" stringByAppendingString:addition]];
+    differences = [self differencesBetweenOldSource:addition newSource:[@"\n" stringByAppendingString:addition]];
     XCTAssertEqualObjects(differences, @[], @"Move to different line number test failed for %@", name);
 }
 
