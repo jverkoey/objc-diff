@@ -35,10 +35,42 @@
     return [comparator differences];
 }
 
+- (NSString *)fuzzyUSRForUSR:(NSString *)USR {
+    NSUInteger atSignLocation = [USR rangeOfString:@"@" options:NSBackwardsSearch].location;
+    if (atSignLocation == NSNotFound) {
+        return USR;
+    }
+
+    NSString *endOfString = [USR substringFromIndex:atSignLocation + 1];
+    if ([endOfString rangeOfCharacterFromSet:[[NSCharacterSet decimalDigitCharacterSet] invertedSet]].location != NSNotFound) {
+        return USR;
+    }
+    return [USR substringToIndex:atSignLocation];
+}
+
+- (NSDictionary *)fuzzyAPIWithAPI:(NSDictionary *)api {
+    NSMutableDictionary *fuzzyAPI = [NSMutableDictionary dictionary];
+    for (NSString *USR in api) {
+        NSString *fuzzyUSR = [self fuzzyUSRForUSR:USR];
+        NSAssert(!fuzzyAPI[fuzzyUSR], @"Existing USR found %@ %@.", fuzzyUSR, USR);
+        fuzzyAPI[fuzzyUSR] = api[USR];
+
+#if 0
+        NSMutableArray *fuzzyUSRs = fuzzyAPI[fuzzyUSR];
+        if (!fuzzyUSRs) {
+            fuzzyUSRs = [NSMutableArray array];
+            fuzzyAPI[fuzzyUSR] = fuzzyUSRs;
+        }
+        [fuzzyUSRs addObject:api[USR]];
+#endif
+    }
+    return fuzzyAPI;
+}
+
 - (NSArray *)differences {
     NSMutableArray *differences = [NSMutableArray array];
-    NSDictionary *oldAPI = [self APIForTranslationUnit:_oldTranslationUnit];
-    NSDictionary *newAPI = [self APIForTranslationUnit:_newTranslationUnit];
+    NSDictionary *oldAPI = [self fuzzyAPIWithAPI:[self APIForTranslationUnit:_oldTranslationUnit]];
+    NSDictionary *newAPI = [self fuzzyAPIWithAPI:[self APIForTranslationUnit:_newTranslationUnit]];
     NSMutableArray *removals = [NSMutableArray array];
 
     NSMutableSet *additions = [NSMutableSet setWithArray:[newAPI allKeys]];
