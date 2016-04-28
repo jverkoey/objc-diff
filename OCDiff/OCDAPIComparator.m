@@ -53,12 +53,12 @@
     NSMutableDictionary *firstPass = [NSMutableDictionary dictionary];
     for (NSString *USR in api) {
         NSString *fuzzyUSR = [self fuzzyUSRForUSR:USR];
-        NSMutableArray *fuzzyUSRs = firstPass[fuzzyUSR];
-        if (!fuzzyUSRs) {
-            fuzzyUSRs = [NSMutableArray array];
-            firstPass[fuzzyUSR] = fuzzyUSRs;
+        NSMutableArray *USRs = firstPass[fuzzyUSR];
+        if (!USRs) {
+            USRs = [NSMutableArray array];
+            firstPass[fuzzyUSR] = USRs;
         }
-        [fuzzyUSRs addObject:USR];
+        [USRs addObject:USR];
     }
 
     // Second pass flattens the fuzzy USRs by sorting their line numbers
